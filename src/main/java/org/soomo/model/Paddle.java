@@ -10,8 +10,6 @@ import static org.soomo.controller.GameStart.SCENE_HEIGHT;
 import static org.soomo.controller.GameStart.SCENE_WIDTH;
 
 public class Paddle extends Rectangle {
-    // Class to represent the paddle controlled by the player
-
     private static final int PADDLE_WIDTH = SCENE_WIDTH / 10; // Width of the paddle
     private static final int PADDLE_HEIGHT = SCENE_HEIGHT / 25; // Height of the paddle
     private static final int MAX_SPEED = 25; // Maximum speed of the paddle
@@ -20,7 +18,6 @@ public class Paddle extends Rectangle {
 
     public Paddle() {
         // Constructor for the paddle
-        // Load the image
         Image paddleImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/paddle.jpg")));
 
         // Create an image pattern from the image

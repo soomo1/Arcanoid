@@ -35,7 +35,6 @@ public record Level(int levelNum, int[][] brickLayout) {
         } else {
             sb.append("No bricks available");
         }
-
         return sb.toString();
     }
 }

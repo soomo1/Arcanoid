@@ -8,10 +8,8 @@ import org.soomo.model.Level;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LevelHandler {
     private static List<Level> levels;
@@ -34,9 +32,11 @@ public class LevelHandler {
         LevelHandler.levels = levels;
     }
 
-    // Section 1: Methods for reading levels from JSON files
-
-    // Load levels from JSON file
+    public static Set<Integer> getLevelNums() {
+        return levels.stream()
+                .map(Level::levelNum)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Reads levels from a JSON file, the path to which is specified in a configuration file.
@@ -44,40 +44,29 @@ public class LevelHandler {
      * @return A List of Level objects.
      */
     public static List<Level> readLevels() {
-        System.out.println("Debug: Entered readLevels() method.");
-
         // Default JSON file path
         String defaultJsonPath = "/levels.json";
-        System.out.println("Debug: Default JSON path set to " + defaultJsonPath);
 
         // Load properties from config file
         Properties properties = new Properties();
         String levelsJsonPath;
         try {
-            System.out.println("Debug: Attempting to load properties from config file.");
             properties.load(LevelHandler.class.getResourceAsStream("/config.properties"));
             // Get JSON file path from properties
-            System.out.println("Debug: Retrieving JSON path from properties.");
             levelsJsonPath = properties.getProperty("levels.json.path", defaultJsonPath);
-            System.out.println("Debug: Using JSON path: " + levelsJsonPath);
 
         } catch (IOException e) {
             System.out.println("Debug: Error occurred while loading properties. Using default path.");
             e.printStackTrace();
             levelsJsonPath = defaultJsonPath; // Use default if config file is not found or corrupt
         }
-
         // Initialize Gson object
-        System.out.println("Debug: Initializing Gson object.");
         Gson gson = new Gson();
-
         List<Level> levelList = null;
 
         // Create a Reader object to read the JSON file from the resource stream
-        try (Reader reader =
-                     new InputStreamReader(Objects.requireNonNull(LevelHandler.class.getResourceAsStream(levelsJsonPath)))) {
+        try (Reader reader = new InputStreamReader(Objects.requireNonNull(LevelHandler.class.getResourceAsStream(levelsJsonPath)))) {
             // Deserialize the JSON file into a List of Level objects
-            System.out.println("Debug: Attempting to deserialize JSON into List of Level objects.");
             levelList = gson.fromJson(reader, new TypeToken<List<Level>>() {
             }.getType());
             System.out.println("Debug: Successfully deserialized JSON.");
@@ -87,8 +76,6 @@ public class LevelHandler {
             e.printStackTrace();
             // Handle error (You can also throw a custom exception or return a default value here)
         }
-
-        System.out.println("Debug: Exiting readLevels() method.");
         setLevels(levelList);
         return levelList;
     }

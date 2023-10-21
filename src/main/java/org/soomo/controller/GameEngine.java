@@ -1,6 +1,5 @@
 package org.soomo.controller;
 
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -10,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,6 +30,8 @@ import org.soomo.view.GamePane;
 import java.util.Iterator;
 import java.util.Objects;
 
+import static org.soomo.controller.ScoreManager.*;
+
 public class GameEngine {
     private final Stage stage; // JavaFX stage
     private GamePane gamePane; // Reference to the game pane (view)
@@ -40,10 +40,6 @@ public class GameEngine {
     private AnimationTimer gameLoop; // AnimationTimer for the game loop
     private boolean goLeft, goRight; // Booleans to control the paddle's movement
     private boolean isPaused = false; // Flag to track pause state
-
-
-    // Variables for score system
-    private long startTime; // Store the time when the level started
     private int score = 0; // Store the player's score
     private Label scoreLabel = new Label("Score: " + score); // Label to display the score
 
@@ -55,17 +51,18 @@ public class GameEngine {
         this.stage = stage;
         this.gamePane = gamePane; // Now we have a reference to the GamePane
 
-        scoreLabel.setLayoutX(10); // 10 pixels from the left
-        scoreLabel.setLayoutY(GameStart.SCENE_HEIGHT - 30); // 30 pixels from the bottom
-        gamePane.getChildren().add(scoreLabel); // Add the label to the game pane
+        scoreLabel.setLayoutX(10);
+        scoreLabel.setLayoutY(GameStart.SCENE_HEIGHT - 30);
+        gamePane.getChildren().add(scoreLabel);
     }
-
     public Stage getStage() {
         return this.stage;
     }
+    public GamePane getGamePane() {
+        return this.gamePane;
+    }
 
     public void setMovementFlags(boolean goLeft, boolean goRight) {
-        // Method to set the movement flags for the paddle
         this.goLeft = goLeft;
         this.goRight = goRight;
     }
@@ -96,7 +93,9 @@ public class GameEngine {
         int bricksDestroyed = 0;
         if (bricksDestroyed == gamePane.getBricks().size()) {
             // Stop the game and display "You Win!" message
+            stopScoring();
             stopGame();
+            setLevelsToComplete(currentLevel.levelNum());
             showWinScreen();
         }
         // Check lose condition
@@ -104,12 +103,12 @@ public class GameEngine {
         if (gamePane.getBall().getTranslateY() >= gamePane.getHeight()) {
             // Decrement remaining lives
             remainingLives--;
-            // Update the life indicator
             gamePane.updateLifeIndicator(remainingLives);
 
             // Check if there are no more lives left
             if (remainingLives <= 0) {
                 // Game over logic
+                stopScoring();
                 stopGame();
                 showGameOverScreen();
             } else {
@@ -135,31 +134,8 @@ public class GameEngine {
             winGif.setPreserveRatio(true);
             winGif.setFitHeight(300);
 
-//            // Create HBox to hold the buttons
-//            Alert alert = new Alert(Alert.AlertType.NONE);
-//            HBox hbox = new HBox(10, ButtonFactory.createNextLevelButton(alert, currentLevel, stage), ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createExitButton());
-//
-//            // Create VBox to hold the ImageView and the HBox
-//            VBox vbox = new VBox(10, winGif, hbox);
-//
-//            // Remove default spacings and paddings
-//            hbox.setSpacing(10);
-//            hbox.setAlignment(Pos.CENTER); // This centers the buttons in the HBox
-//            hbox.setPadding(new Insets(0));
-//            vbox.setSpacing(10);
-//            vbox.setPadding(new Insets(0));
-//            vbox.setAlignment(Pos.CENTER); // This centers the content in the VBox
-//
-//            // Create the Alert and set its properties
-//            alert.initStyle(StageStyle.TRANSPARENT);
-//            alert.getDialogPane().setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"); // Make the dialog pane transparent and remove padding
-//            vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-//            alert.getDialogPane().setContent(vbox);
-
-
             //alert.show();
             createAlertWithContent(winGif, "winScreen").show();
-
         });
     }
 
@@ -182,18 +158,14 @@ public class GameEngine {
                 vbox = new VBox(10, imageView, hbox);
                 break;
             case "finalwin":
-                //TODO `final score`
-                // Display the final score
-                Label finalScoreLabel = new Label("Final Score: " + "69");
+                Label finalScoreLabel = new Label(getFinalScore());
+                updateTopScores(getAccumulatedScore());
                 hbox = new HBox(10, ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createTryButton(currentLevel, alert, stage), ButtonFactory.createExitButton());
                 vbox = new VBox(10, imageView, finalScoreLabel, hbox);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown screenType: " + screenType);
-        };
-        // Create VBox to hold the ImageView and the HBox
-        //VBox vbox = new VBox(10, imageView, hbox);
-
+        }
         // Remove default spacings and paddings
         hbox.setSpacing(10);
         hbox.setAlignment(Pos.CENTER); // This centers the buttons in the HBox
@@ -210,56 +182,6 @@ public class GameEngine {
         return alert;
     }
 
-    ;
-
-    private void showGameOverScreen1() {
-        Platform.runLater(() -> {
-            // Create an ImageView to hold the GIF
-            ImageView gameOverGif = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/backgrounds/game_over.gif"))));
-
-            // Set dimensions for the ImageView, optional
-            gameOverGif.setFitHeight(200);
-            gameOverGif.setFitWidth(200);
-
-            // Create HBox to hold the buttons
-            Alert alert = new Alert(Alert.AlertType.NONE);
-            HBox hbox = new HBox(10, ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createExitButton(), ButtonFactory.createTryButton(currentLevel, alert, stage));
-
-            // Create VBox to hold the ImageView and the HBox
-            VBox vbox = new VBox(10, gameOverGif, hbox);
-            //  Alert sets its properties
-            alert.initStyle(StageStyle.UTILITY);
-            alert.getDialogPane().setContent(vbox);
-            alert.show();
-        });
-    }
-
-    private void showGameOverScreen2() {
-        Platform.runLater(() -> {
-            // Create an ImageView to hold the GIF
-            ImageView gameOverGif = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/backgrounds/game_over.gif"))));
-
-            // Set dimensions for the ImageView, optional
-            gameOverGif.setFitHeight(200);
-            gameOverGif.setFitWidth(200);
-
-            // Create HBox to hold the buttons
-            Alert alert = new Alert(Alert.AlertType.NONE);
-            HBox hbox = new HBox(10, ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createExitButton(), ButtonFactory.createTryButton(currentLevel, alert, stage));
-
-            // Create VBox to hold the ImageView and the HBox
-            VBox vbox = new VBox(10, gameOverGif, hbox);
-
-            // Alert sets its properties
-            alert.initStyle(StageStyle.TRANSPARENT); // Make the window frame transparent
-            alert.getDialogPane().setStyle("-fx-background-color: transparent;"); // Make the dialog pane transparent
-            vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-
-            alert.getDialogPane().setContent(vbox);
-            alert.show();
-        });
-    }
-
     private void showGameOverScreen() {
         Platform.runLater(() -> {
             // Create an ImageView to hold the GIF
@@ -267,35 +189,11 @@ public class GameEngine {
 
             // Ensure ImageView stretches to fill its container
             gameOverGif.setPreserveRatio(true);
-            gameOverGif.setFitWidth(300);  // Set to desired width            // No need to set FitWidth since we want it to stretch
-
-//            // Create HBox to hold the buttons
-//            Alert alert = new Alert(Alert.AlertType.NONE);
-//            HBox hbox = new HBox(10, ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createExitButton(), ButtonFactory.createTryButton(currentLevel, alert, stage));
-//
-//            // Create VBox to hold the ImageView and the HBox
-//            VBox vbox = new VBox(10, gameOverGif, hbox);
-//
-//            // Remove default spacings and paddings
-//            hbox.setSpacing(10);
-//            hbox.setAlignment(Pos.CENTER); // This centers the buttons in the HBox
-//            hbox.setPadding(new Insets(0));
-//            vbox.setSpacing(10);
-//            vbox.setPadding(new Insets(0));
-//            vbox.setAlignment(Pos.CENTER); // This centers the content in the VBox
-//
-//            // Alert sets its properties
-//            alert.initStyle(StageStyle.TRANSPARENT); // Make the window frame transparent
-//            alert.getDialogPane().setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"); // Make the dialog pane transparent and remove padding
-//            vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-//
-//            alert.getDialogPane().setContent(vbox);
-//            alert.show();
+            gameOverGif.setFitWidth(300);
 
             createAlertWithContent(gameOverGif, "gameOverScreen").show();
         });
     }
-
 
     // Collision detection between ball and bricks
     private void checkCollisionWithBallAndBricks() {
@@ -322,7 +220,6 @@ public class GameEngine {
         }
     }
 
-    // Method to check for collision between the ball and the paddle
     private void checkCollisionWithPaddle() {
         // Get the bounds of the ball and paddle in the parent coordinate system
         Bounds ballBounds = gamePane.getBall().getBoundsInParent();
@@ -357,61 +254,30 @@ public class GameEngine {
      * @param level The Level object that defines the new level.
      */
     public void startLevel(Level level) {
-        startTime = System.currentTimeMillis(); // Get the current time
-
         // Clear any existing game elements from the game pane
         gamePane.clear();
         gamePane = new GamePane();
+       // gamePane.getBall().updateSpeed();
+        // Score Manager
+        gamePane.getChildren().add(new ScoreManager().getScoreLabel());
+        ScoreManager.startScoring();
 
-        // Initialize the score label
-        scoreLabel = new Label("Score: " + score);
-        scoreLabel.setLayoutX(10); // 10 pixels from the left
-        scoreLabel.setLayoutY(GameStart.SCENE_HEIGHT - 30); // 30 pixels from the bottom
-        scoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));  // Set font, adjust as needed
-        scoreLabel.setTextFill(Color.WHITE);  // Set text color, adjust as needed
-
-
-        // Create the 'Ready' and 'Go' text
-        Text readyText = new Text("Ready");
-        readyText.setFont(Font.font("Arial", FontWeight.BOLD, 80));  // Set the font family, weight, and size
-        readyText.setFill(Color.RED);  // Set the fill color to red
-        readyText.setStroke(Color.PURPLE);  // Set the stroke color to green
-        readyText.setStrokeWidth(2);  // Set the stroke width
-        readyText.setVisible(false);
-
-        Text goText = new Text("Go");
-        goText.setFont(Font.font("Arial", FontWeight.BOLD, 80));  // Set the font family, weight, and size
-        goText.setFill(Color.RED);  // Set the fill color to red
-        goText.setStroke(Color.PURPLE);  // Set the stroke color to green
-        goText.setStrokeWidth(2);  // Set the stroke width
-        goText.setVisible(false);
-
+        Text readyText = createReady();
+        Text goText = createGo();
         gamePane.getChildren().addAll(readyText, goText);
-
-        gamePane.getChildren().add(scoreLabel);
-
 
         // Schedule a "later" operation to position Text after Scene is initialized
         Platform.runLater(() -> {
-            double centerX = gamePane.getWidth() / 2;
-            double centerY = gamePane.getHeight() / 2;
+            readyText.setX(gamePane.getWidth() / 2 - readyText.getLayoutBounds().getWidth() / 2);
+            readyText.setY(gamePane.getHeight() / 2 - readyText.getLayoutBounds().getHeight() / 2);
 
-            readyText.setX(centerX - readyText.getLayoutBounds().getWidth() / 2);
-            readyText.setY(centerY - readyText.getLayoutBounds().getHeight() / 2);
-
-            goText.setX(centerX - goText.getLayoutBounds().getWidth() / 2);
-            goText.setY(centerY - goText.getLayoutBounds().getHeight() / 2);
+            goText.setX(gamePane.getWidth() / 2 - goText.getLayoutBounds().getWidth() / 2);
+            goText.setY(gamePane.getHeight() / 2 - goText.getLayoutBounds().getHeight() / 2);
         });
-
 
         // Create the Timeline for 'Ready'
         Timeline readyTimeline = getTimeline(readyText, goText);
         readyTimeline.play();
-
-        // Start a Timeline to update the score every second
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> updateScore()));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
 
         // Set the new brick layout in the game pane
         gamePane.setBricks(LevelHandler.generateBricksLayout(level));
@@ -423,7 +289,32 @@ public class GameEngine {
         gameScene.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
         gameScene.addEventFilter(KeyEvent.KEY_RELEASED, this::handleKeyRelease);
 
+        // Debug: Ball
+        System.out.println(
+                "Debug: Ball Sped:" + "\n" + "x = " + gamePane.getBall().getXSpeed() + "\n" + "y = " + gamePane.getBall().getYSpeed());
+
         stage.setScene(gameScene);
+    }
+
+    public Text createReady() {
+        // Create the 'Ready' and 'Go' text
+        Text readyText = new Text("Ready");
+        readyText.setFont(Font.font("Arial", FontWeight.BOLD, 80));
+        readyText.setFill(Color.RED);
+        readyText.setStroke(Color.PURPLE);
+        readyText.setStrokeWidth(2);
+        readyText.setVisible(false);
+        return readyText;
+    }
+
+    public Text createGo() {
+        Text goText = new Text("Go");
+        goText.setFont(Font.font("Arial", FontWeight.BOLD, 80));
+        goText.setFill(Color.RED);
+        goText.setStroke(Color.PURPLE);
+        goText.setStrokeWidth(2);
+        goText.setVisible(false);
+        return goText;
     }
 
     private Timeline getTimeline(Text readyText, Text goText) {
@@ -476,33 +367,7 @@ public class GameEngine {
             // Set dimensions for the ImageView, optional
             pauseGif.setPreserveRatio(true);
             pauseGif.setFitHeight(300);
-
-//            // Create HBox to hold the buttons
-//            Alert alert = new Alert(Alert.AlertType.NONE);
-//            HBox hbox = new HBox(10, ButtonFactory.createResumeButton(alert, this), ButtonFactory.createHomeScreenButton(stage, alert), ButtonFactory.createExitButton());
-//
-//            // Create VBox to hold the ImageView and the HBox
-//            VBox vbox = new VBox(10, pauseGif, hbox);
-//
-//            // Remove default spacings and paddings
-//            hbox.setSpacing(10);
-//            hbox.setAlignment(Pos.CENTER); // This centers the buttons in the HBox
-//            hbox.setPadding(new Insets(0));
-//            vbox.setSpacing(10);
-//            vbox.setPadding(new Insets(0));
-//            vbox.setAlignment(Pos.CENTER); // This centers the content in the VBox
-//
-//            // Create the Alert and set its properties
-//            alert.initStyle(StageStyle.TRANSPARENT);
-//            alert.getDialogPane().setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"); // Make the dialog pane transparent and remove padding
-//            vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-//            alert.getDialogPane().setContent(vbox);
-//            alert.show();
-
-
             createAlertWithContent(pauseGif, "pauseScreen").show();
-
-
         });
     }
 
@@ -519,6 +384,23 @@ public class GameEngine {
         isPaused = !isPaused;
     }
 
+//    public void startGameLoop() {
+//        gameLoop = new AnimationTimer() {
+//            @Override
+//            public void handle(long now) {
+//                if (previousTime == 0) {
+//                    previousTime = now;
+//                }
+//
+//                float deltaTime = (now - previousTime) / 1_000_000_000.0f; // Convert to seconds
+//                previousTime = now;
+//
+//                update(deltaTime); // Pass deltaTime to your update method
+//            }
+//        };
+//        gameLoop.start();
+//    }
+
     public void startGameLoop() {
         gameLoop = new AnimationTimer() {
             @Override
@@ -528,32 +410,4 @@ public class GameEngine {
         };
         gameLoop.start();
     }
-
-    private void updateScore() {
-        long elapsedTime = System.currentTimeMillis() - startTime; // Time elapsed in milliseconds
-        score = (int) elapsedTime / 1000; // Convert to seconds
-        scoreLabel.setText("Score: " + score);
-    }
-
-    private Alert createAlertWithContent1(ImageView imageView, Button... buttons) {
-        Alert alert = new Alert(Alert.AlertType.NONE);
-
-        HBox hbox = new HBox(10, buttons);
-        hbox.setSpacing(10);
-        hbox.setAlignment(Pos.CENTER);
-        hbox.setPadding(new Insets(0));
-
-        VBox vbox = new VBox(10, imageView, hbox);
-        vbox.setSpacing(10);
-        vbox.setPadding(new Insets(0));
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-
-        alert.initStyle(StageStyle.TRANSPARENT);
-        alert.getDialogPane().setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"); // Make the dialog pane transparent and remove padding
-        alert.getDialogPane().setContent(vbox);
-
-        return alert;
-    }
-
 }

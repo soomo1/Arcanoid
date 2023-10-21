@@ -2,6 +2,7 @@ package org.soomo.view;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -11,6 +12,7 @@ public class HomeScreenView extends VBox {
     private final Button newGameButton;
     private final Button selectLevelButton;
     private final Button highScoresButton;
+    private final Button setDifficultyButton;
     private final Button soundToggleButton;
     private final Button exitButton;
 
@@ -20,6 +22,7 @@ public class HomeScreenView extends VBox {
         selectLevelButton = new Button("Select Level");
         highScoresButton = new Button("High Scores");
         soundToggleButton = new Button("Sound: ON");
+        setDifficultyButton = new Button("Difficulty");
         exitButton = new Button("Exit Game");
 
         // Set the alignment to center
@@ -29,7 +32,7 @@ public class HomeScreenView extends VBox {
         setSpacing(10);
         // Add buttons to layout
         getChildren()
-                .addAll(newGameButton, selectLevelButton, highScoresButton, soundToggleButton, exitButton);
+                .addAll(newGameButton, selectLevelButton, highScoresButton,  soundToggleButton, setDifficultyButton, exitButton);
         // Initialize background
         fitBackgroundToStage(stage);
     }
@@ -42,13 +45,15 @@ public class HomeScreenView extends VBox {
         return selectLevelButton;
     }
 
-    //TODO Implement HighScoresButton
     public Button getHighScoresButton() {
         return highScoresButton;
     }
 
     public Button getSoundToggleButton() {
         return soundToggleButton;
+    }
+    public Button getSetDifficultyButton() {
+        return setDifficultyButton;
     }
 
     public Button getExitButton() {
@@ -91,4 +96,5 @@ public class HomeScreenView extends VBox {
         Background vboxBackground = new Background(backgroundImageObj);
         this.setBackground(vboxBackground);
     }
+
 }

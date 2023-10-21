@@ -37,8 +37,6 @@ public class ButtonFactory {
         });
         return tryButton;
     }
-
-
     public static Button createExitButton() {
         Button exitButton = new Button("Exit");
         exitButton.setOnAction(e -> System.exit(0));
@@ -83,32 +81,6 @@ public class ButtonFactory {
                     // Set dimensions for the ImageView, optional
                     finalWinGif.setPreserveRatio(true);
                     finalWinGif.setFitHeight(300);
-
-//                    //TODO `final score`
-//                    // Display the final score
-//                    Label finalScoreLabel = new Label("Final Score: " + "69");
-//
-//                    // Create HBox to hold the buttons
-//                    Alert alert2 = new Alert(Alert.AlertType.NONE);
-//                    HBox hbox = new HBox(10, ButtonFactory.createHomeScreenButton(stage, alert2), ButtonFactory.createTryButton(currentLevel, alert2, stage), ButtonFactory.createExitButton());
-//
-//                    // Create VBox to hold the ImageView, final score label and the HBox
-//                    VBox vbox = new VBox(10, finalWinGif, finalScoreLabel, hbox);
-//
-//                    // Remove default spacings and paddings
-//                    hbox.setSpacing(10);
-//                    hbox.setAlignment(Pos.CENTER); // This centers the buttons in the HBox
-//                    hbox.setPadding(new Insets(0));
-//                    vbox.setSpacing(10);
-//                    vbox.setPadding(new Insets(0));
-//                    vbox.setAlignment(Pos.CENTER); // This centers the content in the VBox
-//
-//                    // Create the Alert and set its properties
-//                    alert2.initStyle(StageStyle.TRANSPARENT);
-//                    alert2.getDialogPane().setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"); // Make the dialog pane transparent and remove padding
-//                    vbox.setStyle("-fx-background-color: transparent;"); // Make the VBox transparent
-//                    alert2.getDialogPane().setContent(vbox);
-//                    alert2.show();
                     gameEngine.createAlertWithContent( finalWinGif,"finalWin").show();
                 });
             }

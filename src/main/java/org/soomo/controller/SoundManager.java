@@ -12,7 +12,8 @@ public class SoundManager {
     private static final List<MediaPlayer> activePlayers = new ArrayList<>();
     private static final Media hitBrickMedia;
     private static final MediaPlayer hitBrickPlayer;
-    private static boolean isMuted = false;
+    //TODO Change  isMuted = false;
+    private static boolean isMuted = true;
 
     static {
         String hitBrickPath = Paths.get("src/main/resources/audio/hitBrick.wav").toUri().toString();

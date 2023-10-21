@@ -26,9 +26,6 @@ public class GamePane extends Pane {
 
     public GamePane() {
         bricks = new ArrayList<>();
-        // brickRectangles = new ArrayList<>();
-        ball = new Ball();
-        paddle = new Paddle();
         initLifeIndicator();
         initBallAndPaddle();
         // Load background image from resources
@@ -78,7 +75,6 @@ public class GamePane extends Pane {
 
         getChildren().addAll(brickList);
     }
-
     /**
      * Clears all game elements from the pane.
      */
@@ -93,20 +89,12 @@ public class GamePane extends Pane {
     public void initLifeIndicator() {
         // Create a new Label that will be updated later with the number of hearts.
         lifeLabel = new Label("❤❤❤"); // Three hearts to start the game
-
-        // Make the text red
         lifeLabel.setTextFill(Color.RED);
-
-        // Make the text bold
         lifeLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        // Place the lifeLabel in a HBox (Horizontal Box) to provide flexibility for future UI
-        // enhancements.
-        // Container to hold heart symbols
         HBox lifeContainer = new HBox();
         lifeContainer.getChildren().add(lifeLabel);
 
         // Position the lifeContainer in the upper-left corner of the GamePane.
-        // You can adjust these values as needed to fit your specific layout.
         lifeContainer.setLayoutX(GameStart.SCENE_WIDTH * 0.90);
         lifeContainer.setLayoutY(GameStart.SCENE_HEIGHT * 0.95);
 
@@ -126,15 +114,8 @@ public class GamePane extends Pane {
         // Add them to the game pane
         getChildren().addAll(ball, paddle);
     }
-
-    // Method to update heart symbols based on remaining lives.
     public void updateLifeIndicator(int remainingLives) {
-        // Create a new StringBuilder to hold the heart symbols.
-
-        // Append a heart symbol for each remaining life.
-        // Update the text in lifeLabel to reflect the current number of lives.
         lifeLabel.setText("❤".repeat(Math.max(0, remainingLives))
-                // Update the text in lifeLabel to reflect the current number of lives.
         );
     }
 }
