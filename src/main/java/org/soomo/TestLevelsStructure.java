@@ -6,7 +6,7 @@ import org.soomo.model.Level;
 import java.util.List;
 
 // Assuming the LevelHandler and Level classes are in the same package or imported correctly
-public class TestMain {
+public class TestLevelsStructure {
 
     /**
      * Main method to test readLevels() and print the output.
