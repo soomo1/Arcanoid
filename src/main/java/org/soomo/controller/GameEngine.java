@@ -58,9 +58,6 @@ public class GameEngine {
     public Stage getStage() {
         return this.stage;
     }
-    public GamePane getGamePane() {
-        return this.gamePane;
-    }
 
     public void setMovementFlags(boolean goLeft, boolean goRight) {
         this.goLeft = goLeft;

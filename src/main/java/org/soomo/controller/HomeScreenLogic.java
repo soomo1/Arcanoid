@@ -5,8 +5,6 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.soomo.model.Ball;
@@ -14,18 +12,20 @@ import org.soomo.model.Level;
 import org.soomo.view.GamePane;
 import org.soomo.view.HomeScreenView;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.Properties;
 
 import static org.soomo.controller.ScoreManager.setAccumulatedScore;
 
 public class HomeScreenLogic {
     private final HomeScreenView homeScreenView;
     private final Stage stage; // Assuming you have a reference to the JavaFX stage
-   // private GameEngine gameEngine; // Add a reference to GameEngine
 
     public HomeScreenLogic(HomeScreenView view, Stage stage) {
         this.homeScreenView = view;
@@ -46,25 +46,17 @@ public class HomeScreenLogic {
 
         // Create buttons for each difficulty setting
         Button easyButton = new Button("Easy");
-        easyButton.setOnAction(e -> {
-            updateDifficulty(1, 1);
-        });
+        easyButton.setOnAction(e -> Ball.speed = updateSpeed("Easy"));
 
         Button normalButton = new Button("Normal");
-        normalButton.setOnAction(e -> {
-            updateDifficulty(3, 3);
-        });
+        normalButton.setOnAction(e -> Ball.speed = updateSpeed("Normal"));
 
         Button hardButton = new Button("Hard");
-        hardButton.setOnAction(e -> {
-            updateDifficulty(7, 7);
-        });
+        hardButton.setOnAction(e -> Ball.speed = updateSpeed("Hard"));
 
         // Create an "Exit" button
         Button exitButton = new Button("Exit");
-        exitButton.setOnAction(e -> {
-            showHomeScreen(stage);
-        });
+        exitButton.setOnAction(e -> showHomeScreen(stage));
 
         // Add buttons to the pane
         difficultyPane.getChildren().addAll(easyButton, normalButton, hardButton, exitButton);
@@ -79,55 +71,30 @@ public class HomeScreenLogic {
         stage.setScene(difficultyScene);
     }
 
-//    // Utility method to debug Ball speed
-//    private void debugBallSpeed( double speed) {
-//        // Show ball speeds before update
-//        System.out.println("Before update: ");
-//        System.out.println("ySpeed: " + gameEngine.getGamePane().getBall().getYSpeed());
-//        System.out.println("xSpeed: " + gameEngine.getGamePane().getBall().getXSpeed());
-//
-//        // Update ball speed using updateSpeed method
-//        gameEngine.getGamePane().getBall().updateSpeed();
-//        System.out.println("After update using .updateSpeed(): ");
-//        System.out.println("ySpeed: " + gameEngine.getGamePane().getBall().getYSpeed());
-//        System.out.println("xSpeed: " + gameEngine.getGamePane().getBall().getXSpeed());
-//
-//        // Update ball speed directly
-//        gameEngine.getGamePane().getBall().setXSpeed(speed);
-//        gameEngine.getGamePane().getBall().setYSpeed(speed);
-//        System.out.println("After update using speed YX mets" + speed);
-//        System.out.println("ySpeed: " + gameEngine.getGamePane().getBall().getYSpeed());
-//        System.out.println("xSpeed: " + gameEngine.getGamePane().getBall().getXSpeed());
-//    }
+    /**
+     * Method to update the ball speed based on the difficulty level.
+     *
+     * @param difficulty The difficulty level as a string. Expected values: "Easy", "Normal", "Hard"
+     * @return The new speed as a double
+     */
+    public double updateSpeed(String difficulty) {
+        System.out.println("updateSpeed() called");
+        // Load properties from config file
+        Properties properties = new Properties();
+        double updatedSpeed;
+        try (InputStream input = GameStart.class.getClassLoader().getResourceAsStream("config.properties")) {
+            properties.load(input);
 
+            updatedSpeed = Double.parseDouble(properties.getProperty("difficulty." + difficulty.toLowerCase(), "3"));
+            System.out.println("Updated speed = : " + updatedSpeed);
 
-    private void updateDifficulty(int xSpeed, int ySpeed) {
-        String filePath = "src/main/resources/config.properties";
-        StringBuilder fileContent = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("ball.xSpeed=")) {
-                    line = "ball.xSpeed=" + xSpeed;
-                }
-                if (line.startsWith("ball.ySpeed=")) {
-                    line = "ball.ySpeed=" + ySpeed;
-                }
-                fileContent.append(line).append(System.lineSeparator());
-            }
-        } catch (IOException io) {
-            io.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            // Fallback to a default value
+            updatedSpeed = 3;
         }
-
-        // Write the updated content back to the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(fileContent.toString());
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
+        return updatedSpeed;
     }
-
-
     // Method to show the home screen
     public static void showHomeScreen(Stage stage) {
         // Initialize HomeScreenView and HomeScreenLogic
@@ -164,7 +131,7 @@ public class HomeScreenLogic {
      */
     private void selectLevel() {
         GameEngine gameEngine = new GameEngine(new GamePane(), stage);
-        gameEngine.getGamePane().getBall().updateSpeed();
+        // gameEngine.getGamePane().getBall().updateSpeed();
         // Fetch the list of available levels
         List<Level> levels = LevelHandler.readLevels();
 
@@ -185,10 +152,7 @@ public class HomeScreenLogic {
         }
         // Create an "Exit" button
         Button exitButton = new Button("Exit");
-        exitButton.setOnAction(
-                e -> {
-                    showHomeScreen(gameEngine.getStage()); // Using the new method
-                });
+        exitButton.setOnAction(e -> showHomeScreen(gameEngine.getStage()));
         levelSelectPane.getChildren().add(exitButton);
         // Create a new scene with the same dimensions as the current scene
         Scene levelSelectScene =
@@ -231,7 +195,7 @@ public class HomeScreenLogic {
     }
 
     private List<Long> fetchHighScores() {
-        String scoresPath = "src/main/resources/score.json"; // adjust if your path is different
+        String scoresPath = "src/main/resources/score.json";
         Gson gson = new Gson();
         try {
             FileReader reader = new FileReader(scoresPath);

@@ -12,8 +12,7 @@ public class SoundManager {
     private static final List<MediaPlayer> activePlayers = new ArrayList<>();
     private static final Media hitBrickMedia;
     private static final MediaPlayer hitBrickPlayer;
-    //TODO Change  isMuted = false;
-    private static boolean isMuted = true;
+    private static boolean isMuted = false;
 
     static {
         String hitBrickPath = Paths.get("src/main/resources/audio/hitBrick.wav").toUri().toString();
@@ -39,8 +38,7 @@ public class SoundManager {
 
     // Load and play background music
     public static void playTheme() {
-        //TODO Replace to Theme2
-        Media media = new Media(Paths.get("src/main/resources/audio/mainTheme3.mp3").toUri().toString());
+        Media media = new Media(Paths.get("src/main/resources/audio/mainTheme2.mp3").toUri().toString());
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop indefinitely
         activePlayers.add(mediaPlayer);

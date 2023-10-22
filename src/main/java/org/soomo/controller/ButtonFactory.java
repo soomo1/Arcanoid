@@ -87,6 +87,4 @@ public class ButtonFactory {
         });
         return nextLevelButton;
     }
-
-
 }
